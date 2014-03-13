@@ -5,10 +5,10 @@ var Zombie = cc.Sprite.extend({
     },
     update: function( dt ) {
 		var pos = this.getPosition();
-		if ( pos.x > 0 ) {
+		if ( pos.x > -40 ) {
 	    	this.setPosition( new cc.Point( pos.x -5, pos.y ) );
 		} else {
-	    	this.setPosition( new cc.Point( 800, pos.y ) );
+	    	this.setPosition( new cc.Point( 840, pos.y ) );
 		}
     }
 });

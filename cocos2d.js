@@ -14,7 +14,8 @@
         appFiles:[
             'src/GameLayer.js',
             'src/Zombie.js',
-            'src/Crosshair.js'     //add your own files in order here
+            'src/Crosshair.js',
+            'src/Grass.js'     //add your own files in order here
         ]
     };
 
