@@ -7,7 +7,7 @@ var Zombie = cc.Sprite.extend({
     update: function( dt ) {
 		var pos = this.getPosition();
 		if ( pos.x > -40 ) {
-	    	this.setPosition( new cc.Point( pos.x -1, pos.y ) );
+	    	this.setPosition( new cc.Point( pos.x - 0.3, pos.y ) );
 		} else {
 	    	this.setPosition( new cc.Point( 840, pos.y ) );
 		}
@@ -16,7 +16,13 @@ var Zombie = cc.Sprite.extend({
     	}
     },
     getShot: function( dmg ) {
+        if( this.hp - dmg == 0 ) {
+            this.hp -= dmg;
+            console.log("remaining hp : " + this.hp);
+            return true;
+        }
     	this.hp -= dmg;
     	console.log("remaining hp : " + this.hp);
+        return false;
     }
 });

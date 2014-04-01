@@ -1,11 +1,14 @@
 var GameLayer = cc.LayerColor.extend({
     init: function() {
+        this.score = 0;
         this.ammo = 6;
         this.reloadTime = 0;
         this._super( new cc.Color4B( 127, 127, 127, 255 ) );
         this.setPosition( new cc.Point( 0, 0 ) );
-        this.scoreLabel = cc.LabelTTF.create( 'ammo  ' + this.ammo, 'Arial', 40 );
-        this.scoreLabel.setPosition( new cc.Point( 650, 550 ) );
+        this.ammoLabel = cc.LabelTTF.create( 'ammo  ' + this.ammo, 'Arial', 40 );
+        this.ammoLabel.setPosition( new cc.Point( 650, 550 ) );
+        this.scoreLabel = cc.LabelTTF.create( 'score  ' + this.score, 'Arial', 40 );
+        this.scoreLabel.setPosition( new cc.Point( 450, 550 ) );
         this.reloadLabel = cc.LabelTTF.create( 'Reloading' , 'Arial', 40 );
         this.reloadLabel.setPosition( new cc.Point( screenWidth / 2, screenHeight / 2 ) );
         this.outOfAmmoLabel = cc.LabelTTF.create( 'Out of Ammo!!!' , 'Arial', 40 );
@@ -17,12 +20,13 @@ var GameLayer = cc.LayerColor.extend({
         for(var i = 0; i < 4; i++) {
             this.zombie[i] = new Zombie();
             //this.zombie[i].setPosition( new cc.Point( screenWidth / 2, screenHeight / 2 ) );
-            this.zombie[i].setPosition( Math.floor((Math.random()*800)+1), Math.floor((Math.random()*600)+1) );
+            this.zombie[i].setPosition( Math.floor((Math.random()*700)+1), Math.floor((Math.random()*500)+1) );
             this.addChild(this.zombie[i]);
             this.zombie[i].scheduleUpdate();
         }
         this.crosshair = new Crosshair();
         this.crosshair.setPosition( new cc.Point( screenWidth / 2, screenHeight / 2 ) );
+        this.addChild(this.ammoLabel);
         this.addChild(this.scoreLabel);
         this.addChild(this.crosshair);
         this.setKeyboardEnabled( true );
@@ -37,6 +41,7 @@ var GameLayer = cc.LayerColor.extend({
         }
         if( e == 82 ) {
             if(this.reloadTime === 0) {
+                cc.AudioEngine.getInstance().playEffect( 'effects/reload.wav' );
                 this.ammo = 0;
                 this.reloadTime = 50;
                 this.addChild(this.reloadLabel);
@@ -54,8 +59,9 @@ var GameLayer = cc.LayerColor.extend({
     onMouseMoved:function (event) {
         this.crosshair.setPosition(cc.p( event.getLocation().x, event.getLocation().y));
     },
-    onMouseDown:function () {
+    onMouseDown:function (events) {
         this.fire();
+        this.crosshair.setPosition(cc.p( events.getLocation().x, events.getLocation().y));
     },
     fire:function () {
         if(this.ammo <= 0) {
@@ -65,6 +71,7 @@ var GameLayer = cc.LayerColor.extend({
             this.addChild(this.outOfAmmoLabel);
         }
         this.ammo -= 1;
+        cc.AudioEngine.getInstance().playEffect( 'effects/gunfire.wav' );
         var tempDistance = 0;
         var target = 0;
         for(var i = 0; i < this.zombie.length; i++) {
@@ -77,11 +84,14 @@ var GameLayer = cc.LayerColor.extend({
             }
         }
         if(this.crosshair.closeTo(this.zombie[target])) {
-            this.zombie[target].getShot(1);
+            if ( this.zombie[target].getShot(1) ) {
+                this.score += 1;
+                this.scoreLabel.setString( 'score  ' + this.score );
+            }
         }
     },
     update: function( dt ) {
-        this.scoreLabel.setString( 'ammo  ' + this.ammo );
+        this.ammoLabel.setString( 'ammo  ' + this.ammo );
         if( this.reloadTime > 1) {
             this.removeChild(this.outOfAmmoLabel);
             this.reloadTime -= 1;
