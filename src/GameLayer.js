@@ -1,7 +1,7 @@
 var GameLayer = cc.LayerColor.extend({
     init: function() {
         this.score = 0;
-        this.ammo = 6;
+        this.ammo = 30;
         this.reloadTime = 0;
         this._super( new cc.Color4B( 127, 127, 127, 255 ) );
         this.setPosition( new cc.Point( 0, 0 ) );
@@ -16,14 +16,16 @@ var GameLayer = cc.LayerColor.extend({
         this.grass = new Grass();
         this.grass.setPosition( new cc.Point( screenWidth / 2, screenHeight / 2 ) );
         this.addChild(this.grass);
-        this.zombie = new Array();
-        for(var i = 0; i < 4; i++) {
-            this.zombie[i] = new Zombie();
-            //this.zombie[i].setPosition( new cc.Point( screenWidth / 2, screenHeight / 2 ) );
-            this.zombie[i].setPosition( Math.floor((Math.random()*700)+1), Math.floor((Math.random()*500)+1) );
-            this.addChild(this.zombie[i]);
-            this.zombie[i].scheduleUpdate();
-        }
+        this.zombie = new Array(10);
+        this.spawnZombieAll();
+        this.schedule(this.spawnZombie, 3);
+        // for(var i = 0; i < 50; i++) {
+        //     this.zombie[i] = new Zombie();
+        //     //this.zombie[i].setPosition( new cc.Point( screenWidth / 2, screenHeight / 2 ) );
+        //     this.zombie[i].setPosition( Math.floor((Math.random()*700)+1), Math.floor((Math.random()*500)+1) );
+        //     this.addChild(this.zombie[i]);
+        //     this.zombie[i].scheduleUpdate();
+        // }
         this.crosshair = new Crosshair();
         this.crosshair.setPosition( new cc.Point( screenWidth / 2, screenHeight / 2 ) );
         this.addChild(this.ammoLabel);
@@ -56,7 +58,10 @@ var GameLayer = cc.LayerColor.extend({
             this.crosshair.release(e);
         }
     },
-    onMouseMoved:function (event) {
+    removeZombie: function ( object1 ) {
+        object1 = null;
+    },
+    onMouseMoved: function (event) {
         this.crosshair.setPosition(cc.p( event.getLocation().x, event.getLocation().y));
     },
     onMouseDown:function (events) {
@@ -90,6 +95,35 @@ var GameLayer = cc.LayerColor.extend({
             }
         }
     },
+    spawnZombieAll: function ( ) {
+        var amount = 0;
+        for(var i = 0; i < this.zombie.length; i++) {
+            if( this.zombie[i] == null || this.zombie[i].state == 0 ) {
+                amount += 1;
+                this.zombie[i] = new Zombie();
+                this.zombie[i].setPosition( new cc.Point( screenWidth / 2, screenHeight / 2 ) );
+                this.zombie[i].setPosition( 820, Math.floor((Math.random()*550)+1) );
+                this.addChild(this.zombie[i]);
+                this.zombie[i].scheduleUpdate();
+            }
+        }
+        console.log(amount);
+    },
+    spawnZombie: function ( ) {
+        var amount = 0;
+        for(var i = 0; i < this.zombie.length; i++) {
+            if( this.zombie[i] == null || this.zombie[i].state == 0 ) {
+                amount += 1;
+                this.zombie[i] = new Zombie();
+                this.zombie[i].setPosition( new cc.Point( screenWidth / 2, screenHeight / 2 ) );
+                this.zombie[i].setPosition( 820, Math.floor((Math.random()*550)+1) );
+                this.addChild(this.zombie[i]);
+                this.zombie[i].scheduleUpdate();
+                return;
+            }
+        }
+        console.log(amount);
+    },
     update: function( dt ) {
         this.ammoLabel.setString( 'ammo  ' + this.ammo );
         if( this.reloadTime > 1) {
@@ -98,7 +132,7 @@ var GameLayer = cc.LayerColor.extend({
         }
         if( this.reloadTime == 1) {
             this.reloadTime = 0;
-            this.ammo = 6;
+            this.ammo = 30;
             this.removeChild(this.reloadLabel);
         }
     }
