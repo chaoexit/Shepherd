@@ -16,7 +16,8 @@
             'src/Zombie.js',
             'src/Crosshair.js',
             'src/Grass.js',
-            'src/resource.js'     //add your own files in order here
+            'src/resource.js',
+            'src/Redline.js'     //add your own files in order here
         ]
     };
 

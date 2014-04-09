@@ -2,9 +2,12 @@ var Zombie = cc.Layer.extend({
     spriteSheet:null,
     runningAction:null,
     sprite:null,
-    ctor: function() {
+    ctor: function( dt ) {
         this._super();
         this.init();
+        if( dt == 1 ) {
+            this.state = 2;
+        }
     },
     init: function() { 
         this._super();
@@ -60,14 +63,12 @@ var Zombie = cc.Layer.extend({
         this.scheduleOnce(this.removeMe, 3);
     },
     getShot: function( dmg ) {
-        if( this.hp - dmg == 0 ) {
-            this.hp -= dmg;
-            console.log("remaining hp : " + this.hp);
-            return true;
-        }
     	this.hp -= dmg;
     	console.log("remaining hp : " + this.hp);
-        console.log(this.getPosition().x + " , " + this.getPosition().y);
-        return false;
+        if( this.hp == 0 ) {
+            return true; //Zombie Died
+        }
+        console.log(this.getPosition().x + " , " + this.getPosition().y); //Debug
+        return false; //Zombie Alive
     }
 });

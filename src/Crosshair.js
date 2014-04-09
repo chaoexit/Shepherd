@@ -73,7 +73,13 @@ var Crosshair = cc.Sprite.extend({
     closeTo: function( obj ) {
         var myPos = this.getPosition();
         var oPos = obj.getPosition();
-        return ( ( Math.abs( myPos.x - oPos.x ) <= 20 ) &&
+        return ( ( Math.abs( myPos.x - oPos.x ) <= 23 ) &&
 		 ( Math.abs( myPos.y - oPos.y ) <= 35 ) );
+    },
+    closeToHead: function( obj ) {
+        var myPos = this.getPosition();
+        var oPos = obj.getPosition();
+        return ( ( Math.abs( myPos.x - oPos.x ) <= 5 ) &&
+         ( myPos.y - oPos.y ) <= 35 && (myPos.y - oPos.y) >= 18 );
     }
 });
