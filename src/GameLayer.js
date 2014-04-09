@@ -4,7 +4,8 @@
         this.spawnPosY = [547, 460, 377, 293, 212, 121, 44];
         this.ammo = 30;
         this.fireRate = 0;
-        this.reloadTime = 0;
+        this.reloadTime = 1.5;
+        this.reloading = false;
         this._super( new cc.Color4B( 127, 127, 127, 255 ) );
         this.setPosition( new cc.Point( 0, 0 ) );
         this.ammoLabel = cc.LabelTTF.create( 'ammo  ' + this.ammo, 'Arial', 40 );
@@ -44,10 +45,11 @@
             this.crosshair.press(e);
         }
         if( e == 82 ) {
-            if(this.reloadTime === 0) {
+            if(this.reloading == false) {
                 cc.AudioEngine.getInstance().playEffect( 'effects/reload.wav' );
                 this.ammo = 0;
-                this.reloadTime = 50;
+                this.reloading = true;
+                this.scheduleOnce(this.reload, this.reloadTime);
                 this.addChild(this.reloadLabel);
             }
         }
@@ -140,18 +142,14 @@
     },
     update: function( dt ) {
         this.ammoLabel.setString( 'ammo  ' + this.ammo );
-        if( this.reloadTime > 1) {
-            this.removeChild(this.outOfAmmoLabel);
-            this.reloadTime -= 1;
-        }
-        if( this.reloadTime == 1) {
-            this.reloadTime = 0;
-            this.ammo = 30;
-            this.removeChild(this.reloadLabel);
-        }
         if ( this.fireRate > 0) {
             this.fireRate -= 1;
         }
+    },
+    reload: function() {
+        this.ammo = 30;
+        this.removeChild(this.reloadLabel);
+        this.reloading = false;
     }
 });
 
