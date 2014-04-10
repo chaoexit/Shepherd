@@ -50,6 +50,7 @@
                 this.ammo = 0;
                 this.reloading = true;
                 this.scheduleOnce(this.reload, this.reloadTime);
+                this.removeChild(this.outOfAmmoLabel);
                 this.addChild(this.reloadLabel);
             }
         }
@@ -84,7 +85,7 @@
             this.addChild(this.outOfAmmoLabel);
         }
         this.ammo -= 1;
-        this.fireRate = 3;
+        this.fireRate = 5;
         cc.AudioEngine.getInstance().playEffect( 'effects/gunfire.wav' );
         var tempDistance = 0;
         var target = 0;
