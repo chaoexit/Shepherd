@@ -2,9 +2,10 @@ var Zombie = cc.Layer.extend({
     spriteSheet:null,
     runningAction:null,
     sprite:null,
-    ctor: function( dt ) {
+    ctor: function( dt , gameLayer) {
         this._super();
         this.init();
+        this.gameLayer = gameLayer;
         if( dt == 1 ) {
             this.state = 2;
         }
@@ -14,18 +15,9 @@ var Zombie = cc.Layer.extend({
         this.hp = 10;
         this.state = 1;
         cc.SpriteFrameCache.getInstance().addSpriteFrames("images/testSprite.plist");
-        var animFrames = [];
-        for (var i = 1; i < 11; i++) {
-            var str = "walk" + i + ".png";
-            var frame = cc.SpriteFrameCache.getInstance().getSpriteFrame(str);
-            animFrames.push(frame);
-        }
-        var animation = cc.Animation.create(animFrames, 0.25);
-        this.runningAction = cc.RepeatForever.create(cc.Animate.create(animation));
         this.sprite = cc.Sprite.createWithSpriteFrameName("walk1.png");
         this.sprite.setAnchorPoint( new cc.Point( 0.5, 0.5 ) );
-        //this.sprite.setPosition(cc.p(80, 85));
-        this.sprite.runAction(this.runningAction);
+        this.actionRun();
         this.addChild(this.sprite);
     },
     update: function( dt ) {
@@ -33,10 +25,10 @@ var Zombie = cc.Layer.extend({
         if(this.state == 0) {
             return;
         }
-		if ( pos.x > -10 ) {
+		if ( pos.x > 144 ) {
 	    	this.setPosition( new cc.Point( pos.x - ((Math.random() + 0.3)/ 2), pos.y ) );
 		} else {
-	    	this.setPosition( new cc.Point( 847, pos.y ) );
+	    	this.gameLayer.gameOver();
 		}
 		if(this.hp <= 0) {
             this.deadAnim();
@@ -70,5 +62,27 @@ var Zombie = cc.Layer.extend({
         }
         console.log(this.getPosition().x + " , " + this.getPosition().y); //Debug
         return false; //Zombie Alive
+    }, 
+
+    pause: function() {
+        this.unscheduleUpdate();
+        this.sprite.stopAllActions();
+    },
+
+    resume: function() {
+        this.scheduleUpdate();
+        this.actionRun();
+    },
+
+    actionRun: function() {
+        var animFrames = [];
+        for (var i = 1; i < 11; i++) {
+            var str = "walk" + i + ".png";
+            var frame = cc.SpriteFrameCache.getInstance().getSpriteFrame(str);
+            animFrames.push(frame);
+        }
+        var animation = cc.Animation.create(animFrames, 0.25);
+        this.runningAction = cc.RepeatForever.create(cc.Animate.create(animation));
+        this.sprite.runAction(this.runningAction);
     }
 });
