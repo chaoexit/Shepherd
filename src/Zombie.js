@@ -14,6 +14,7 @@ var Zombie = cc.Layer.extend({
         this._super();
         this.hp = 10;
         this.state = 1;
+        this.isMoneyDrop = 0;
         this.speed = ((Math.random() + 0.3)/ 2);
         cc.SpriteFrameCache.getInstance().addSpriteFrames("images/testSprite.plist");
         this.sprite = cc.Sprite.createWithSpriteFrameName("walk1.png");
@@ -38,6 +39,7 @@ var Zombie = cc.Layer.extend({
 		if(this.hp <= 0) {
             this.sprite.removeChild(this.HealthBar);
             this.deadAnim();
+            this.state = 0;
     	}
     },
     removeMe: function( dts ) {
@@ -48,26 +50,32 @@ var Zombie = cc.Layer.extend({
             return;
         }
         this.sprite.stopAllActions();
-        this.state = 0;
         var deadAnimFrames = [];
         for (var i = 1; i < 4; i++) {
             var str = "dead" + i + ".png";
             var frame = cc.SpriteFrameCache.getInstance().getSpriteFrame(str);
             deadAnimFrames.push(frame);
         }
+        cc.AudioEngine.getInstance().playEffect( 'effects/zombiedead.mp3' );
         var animation = cc.Animation.create(deadAnimFrames, 0.2);
         this.runningAction =  cc.Repeat.create(cc.Animate.create(animation), 1);
         this.sprite.runAction(this.runningAction);
         this.scheduleOnce(this.removeMe, 3);
     },
     getShot: function( dmg ) {
+        if( this.hp <= 0 ) {
+            return false;
+        }
     	this.hp -= dmg;
     	console.log("remaining hp : " + this.hp);
-        if( this.hp == 0 ) {
+        if( this.hp <= 0 ) {
             return true; //Zombie Died
         }
-        console.log(this.getPosition().x + " , " + this.getPosition().y); //Debug
-        return false; //Zombie Alive
+        else {
+            cc.AudioEngine.getInstance().playEffect( 'effects/zombiegetshot.mp3' );
+            console.log(this.getPosition().x + " , " + this.getPosition().y); //Debug
+            return false; //Zombie Alive
+        }
     }, 
 
     pause: function() {

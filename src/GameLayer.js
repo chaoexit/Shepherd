@@ -31,6 +31,8 @@
         this.addChild(this.crosshair, 1);
         this.setKeyboardEnabled( true );
         this.setMouseEnabled( true );
+        cc.AudioEngine.getInstance().setMusicVolume(0.5);
+        cc.AudioEngine.getInstance().playMusic( 'effects/song.mp3', 100 );
         return true;
     },
 
@@ -41,6 +43,8 @@
         }
         this.scheduleOnce(this.spawnZombieAll, 1);
         this.schedule(this.spawnZombie, 2);
+        cc.AudioEngine.getInstance().playEffect( 'effects/ambiance1.mp3' , 100 );
+        cc.AudioEngine.getInstance().playEffect( 'effects/ambiance2.mp3' , 100 );
     },
 
     initLabel: function() {
@@ -172,7 +176,22 @@
             this.zombie[i].resume();
         }
         this.schedule(this.spawnZombie, 2);        
-    }
+    }, 
+
+    activeScore: function( amount ){
+        var score = cc.LabelTTF.create( '+ ' + amount,  'Arial', 40 );
+        score.setPosition( cc.p(250,610) );
+        score.setVisible( false );
+        var actions = [];
+        actions.push( cc.Show.create() );
+        actions.push( cc.FadeIn.create(0.1) );
+        actions.push( cc.MoveBy.create( 0.2, cc.p( 0, 30 ) ) );
+        actions.push( cc.FadeOut.create(0.5) );
+        // actions.push( cc.Hide.create() );
+        actions.push( cc.CallFunc.create( score.removeFromParent, score, true));
+        score.runAction( cc.Sequence.create( actions ) );
+        this.addChild( score );
+    } 
 
 });
 

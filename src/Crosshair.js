@@ -7,7 +7,7 @@ var Crosshair = cc.Sprite.extend({
         this.isRight = false;
         this.isUp = false;
         this.isDown = false;
-        this.ammo = 30;
+        this.ammo = 7;
         this.fireRate = 0;
         this.reloadTime = 1.5;
         this.reloading = false;
@@ -105,7 +105,7 @@ var Crosshair = cc.Sprite.extend({
             this.gameLayer.addChild(this.gameLayer.outOfAmmoLabel);
         }
         this.ammo -= 1;
-        this.fireRate = 5;
+        this.fireRate = 20;
         cc.AudioEngine.getInstance().playEffect( 'effects/gunfire.wav' );
         var tempDistance = 0;
         var target = 0;
@@ -121,17 +121,21 @@ var Crosshair = cc.Sprite.extend({
                 tempDistance = distance;
             }
         }
+        var randomAmount = Math.round(Math.random()*100);
+        var randomAmountHeadShot = Math.round(Math.random()*200);
         if(this.closeToHead(this.gameLayer.zombie[target])) {
             console.log('headshot!!');
             if ( this.gameLayer.zombie[target].getShot(5) ) {
-                this.gameLayer.money += Math.round(Math.random()*100);
-                this.gameLayer.moneyLabel.setString('' + this.gameLayer.money );
+                    this.gameLayer.money += randomAmountHeadShot;
+                    this.gameLayer.moneyLabel.setString('' + this.gameLayer.money );
+                    this.gameLayer.activeScore(randomAmountHeadShot);
             }
         }        
-        else if(this.closeTo(this.gameLayer.zombie[target])) {
+        else if(this.closeTo(this.gameLayer.zombie[target]) && this.gameLayer.zombie[target].state != 3) {
             if ( this.gameLayer.zombie[target].getShot(1) ) {
-                this.gameLayer.money += Math.round(Math.random()*200);
+                this.gameLayer.money += randomAmount;
                 this.gameLayer.moneyLabel.setString('' + this.gameLayer.money );
+                this.gameLayer.activeScore(randomAmount);
             }
         }
     },
@@ -144,7 +148,7 @@ var Crosshair = cc.Sprite.extend({
             this.gameLayer.removeChild(this.gameLayer.outOfAmmoLabel);
             this.gameLayer.addChild(this.gameLayer.reloadLabel);
             this.scheduleOnce(function() {
-                this.ammo = 30;
+                this.ammo = 7;
                 this.gameLayer.removeChild(this.gameLayer.reloadLabel);
                 this.reloading = false
             }    , this.reloadTime);
