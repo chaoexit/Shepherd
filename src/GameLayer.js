@@ -1,6 +1,6 @@
     var GameLayer = cc.LayerColor.extend({
     init: function() {
-        this.score = 0;
+        this.money = 0;
         this.spawnPosY = [547, 460, 377, 293, 212, 121, 44];
 
         this.gameState = 1;
@@ -24,9 +24,10 @@
         this.crosshair.scheduleUpdate()
         this.crosshair.setPosition( new cc.Point( screenWidth / 2, screenHeight / 2 ) );
 
-        this.addChild(this.ammoLabel);
-        this.addChild(this.scoreLabel);
         this.addChild(this.redline);
+        this.addChild(this.ammoLabel);
+        this.addChild(this.moneyLabel);
+        this.addChild(this.moneyTextLabel);
         this.addChild(this.crosshair, 1);
         this.setKeyboardEnabled( true );
         this.setMouseEnabled( true );
@@ -44,10 +45,13 @@
 
     initLabel: function() {
         this.ammoLabel = cc.LabelTTF.create( 'ammo  ' + this.ammo, 'Arial', 40 );
-        this.ammoLabel.setPosition( new cc.Point( 650, 550 ) );
+        this.ammoLabel.setPosition( new cc.Point( 670, 640 ) );
 
-        this.scoreLabel = cc.LabelTTF.create( 'score  ' + this.score, 'Arial', 40 );
-        this.scoreLabel.setPosition( new cc.Point( 450, 550 ) );
+        this.moneyLabel = cc.LabelTTF.create('' + this.money, 'Arial', 40 );
+        this.moneyLabel.setPosition( new cc.Point( 250, 640 ) );
+
+        this.moneyTextLabel = cc.LabelTTF.create( 'Money : ', 'Arial', 40 );
+        this.moneyTextLabel.setPosition( new cc.Point( 100, 640 ) );
 
         this.reloadLabel = cc.LabelTTF.create( 'Reloading' , 'Arial', 40 );
         this.reloadLabel.setPosition( new cc.Point( screenWidth / 2, screenHeight / 2 ) );
@@ -100,16 +104,17 @@
     },
 
     spawnZombieAll: function ( ) {
-        console.log(this.zombie.length);
         var tempSpawnPosY = 0;
         var tempSpawnPosYNew = 0;
         var randomArray = 0;
+        var lastX = 0;
         for(var i = 0; i < this.zombie.length; i++) {
             randomArray = Math.round((Math.random()*6));    
             if( this.zombie[i] == null || this.zombie[i].state == 2 ) {
                 if ( i == 0 ) {
                     tempSpawnPosY = this.spawnPosY[randomArray];
                     tempSpawnPosYNew = tempSpawnPosY;
+                    lastX = 820 + (Math.random()*300);
                 }
                 else if ( i != 0 ) {
                     tempSpawnPosYNew = this.spawnPosY[randomArray];
@@ -118,12 +123,11 @@
                     }
                     tempSpawnPosY = tempSpawnPosYNew;
                 }
-                console.log(tempSpawnPosY);
-                console.log(tempSpawnPosYNew);
                 this.zombie[i] = new Zombie( 0, this);
-                this.zombie[i].setPosition( 820 + (Math.random()*300), tempSpawnPosYNew );
+                this.zombie[i].setPosition( lastX, tempSpawnPosYNew );
                 this.addChild(this.zombie[i]);
                 this.zombie[i].scheduleUpdate();
+                lastX = this.zombie[i].getPosition().x + (Math.random()*200);
             }
         }
     },

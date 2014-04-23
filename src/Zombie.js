@@ -14,23 +14,29 @@ var Zombie = cc.Layer.extend({
         this._super();
         this.hp = 10;
         this.state = 1;
+        this.speed = ((Math.random() + 0.3)/ 2);
         cc.SpriteFrameCache.getInstance().addSpriteFrames("images/testSprite.plist");
         this.sprite = cc.Sprite.createWithSpriteFrameName("walk1.png");
         this.sprite.setAnchorPoint( new cc.Point( 0.5, 0.5 ) );
+        this.HealthBar = new HealthBar();
+        this.HealthBar.setPosition(this.HealthBar.getPosition().x + 20, this.HealthBar.getPosition().y);
+        this.sprite.addChild(this.HealthBar);
         this.actionRun();
         this.addChild(this.sprite);
     },
     update: function( dt ) {
 		var pos = this.getPosition();
+        this.HealthBar.setScaleX(this.hp/10);
         if(this.state == 0) {
             return;
         }
 		if ( pos.x > 144 ) {
-	    	this.setPosition( new cc.Point( pos.x - ((Math.random() + 0.3)/ 2), pos.y ) );
+	    	this.setPosition( new cc.Point( pos.x - this.speed, pos.y ) );
 		} else {
 	    	this.gameLayer.gameOver();
 		}
 		if(this.hp <= 0) {
+            this.sprite.removeChild(this.HealthBar);
             this.deadAnim();
     	}
     },

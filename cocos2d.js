@@ -17,7 +17,8 @@
             'src/Crosshair.js',
             'src/Grass.js',
             'src/resource.js',
-            'src/Redline.js'     //add your own files in order here
+            'src/Redline.js',
+            'src/HealthBar.js'   //add your own files in order here
         ]
     };
 

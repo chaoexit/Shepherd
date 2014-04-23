@@ -123,15 +123,15 @@ var Crosshair = cc.Sprite.extend({
         }
         if(this.closeToHead(this.gameLayer.zombie[target])) {
             console.log('headshot!!');
-            if ( this.gameLayer.zombie[target].getShot(10) ) {
-                this.gameLayer.score += 1;
-                this.gameLayer.scoreLabel.setString( 'score  ' + this.gameLayer.score );
+            if ( this.gameLayer.zombie[target].getShot(5) ) {
+                this.gameLayer.money += Math.round(Math.random()*100);
+                this.gameLayer.moneyLabel.setString('' + this.gameLayer.money );
             }
         }        
         else if(this.closeTo(this.gameLayer.zombie[target])) {
             if ( this.gameLayer.zombie[target].getShot(1) ) {
-                this.score += 1;
-                this.scoreLabel.setString( 'score  ' + this.score );
+                this.gameLayer.money += Math.round(Math.random()*200);
+                this.gameLayer.moneyLabel.setString('' + this.gameLayer.money );
             }
         }
     },
