@@ -4,6 +4,7 @@
         this.spawnPosY = [547, 460, 377, 293, 212, 121, 44];
 
         this.gameState = this.gameState = GameLayer.STATE.NORMAL;
+        this.muted = 0;
 
         this._super( new cc.Color4B( 127, 127, 127, 255 ) );
         this.setPosition( new cc.Point( 0, 0 ) );
@@ -77,6 +78,9 @@
 
     onKeyDown: function( e ) {
         console.log(e);
+        if(e == 77) {
+            this.mute();
+        }
         if(e == 37 || e == 38 || e == 39 || e == 40) {
             this.crosshair.press(e);
         }
@@ -232,7 +236,7 @@
     },
 
     warn: function( message ){
-        var score = cc.LabelTTF.create( '' + message,  'Arial', 40 );
+        var score = cc.LabelTTF.create( '' + message,  'Arial', 35 );
         score.setPosition( cc.p(400,450) );
         score.setVisible( false );
         var actions = [];
@@ -243,7 +247,20 @@
         actions.push( cc.CallFunc.create( score.removeFromParent, score, true));
         score.runAction( cc.Sequence.create( actions ) );
         this.addChild( score );
-    } 
+    },
+
+    mute: function () {
+        if( this.muted == 0 ) {
+            cc.AudioEngine.getInstance().setMusicVolume(0);
+            cc.AudioEngine.getInstance().setEffectsVolume(0);    
+            this.muted = 1;
+        }
+        else {
+            cc.AudioEngine.getInstance().setMusicVolume(0.7);
+            cc.AudioEngine.getInstance().setEffectsVolume(1);    
+            this.muted = 0;            
+        }
+    }
 
 });
 
