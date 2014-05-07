@@ -3,10 +3,14 @@
         this.money = 0;
         this.spawnPosY = [547, 460, 377, 293, 212, 121, 44];
 
-        this.gameState = 1;
+        this.gameState = this.gameState = GameLayer.STATE.NORMAL;
 
         this._super( new cc.Color4B( 127, 127, 127, 255 ) );
         this.setPosition( new cc.Point( 0, 0 ) );
+
+        this.crosshair = new Crosshair(this);
+        this.crosshair.scheduleUpdate()
+        this.crosshair.setPosition( new cc.Point( screenWidth / 2, screenHeight / 2 ) );
 
         this.initLabel();
 
@@ -20,20 +24,24 @@
 
         this.initZombie();
 
-        this.crosshair = new Crosshair(this);
-        this.crosshair.scheduleUpdate()
-        this.crosshair.setPosition( new cc.Point( screenWidth / 2, screenHeight / 2 ) );
 
         this.addChild(this.redline);
         this.addChild(this.ammoLabel);
+        this.addChild(this.magazineLabel)
         this.addChild(this.moneyLabel);
         this.addChild(this.moneyTextLabel);
         this.addChild(this.crosshair, 1);
         this.setKeyboardEnabled( true );
         this.setMouseEnabled( true );
-        cc.AudioEngine.getInstance().setMusicVolume(0.5);
+        cc.AudioEngine.getInstance().setMusicVolume(0.7);
         cc.AudioEngine.getInstance().playMusic( 'effects/song.mp3', 100 );
+
+        this.scheduleUpdate();
         return true;
+    },
+
+    update: function() {
+        this.moneyLabel.setString('' + this.money );
     },
 
     initZombie: function() {
@@ -48,8 +56,11 @@
     },
 
     initLabel: function() {
-        this.ammoLabel = cc.LabelTTF.create( 'ammo  ' + this.ammo, 'Arial', 40 );
-        this.ammoLabel.setPosition( new cc.Point( 670, 640 ) );
+        this.ammoLabel = cc.LabelTTF.create( 'ammo  ' + this.crosshair.ammo, 'Arial', 25 );
+        this.ammoLabel.setPosition( new cc.Point( 670, 620 ) );
+
+        this.magazineLabel = cc.LabelTTF.create( 'magazine  ' + this.crosshair.magazine, 'Arial', 25 );
+        this.magazineLabel.setPosition( new cc.Point( 670, 660 ) );
 
         this.moneyLabel = cc.LabelTTF.create('' + this.money, 'Arial', 40 );
         this.moneyLabel.setPosition( new cc.Point( 250, 640 ) );
@@ -69,42 +80,51 @@
         if(e == 37 || e == 38 || e == 39 || e == 40) {
             this.crosshair.press(e);
         }
+        if(e == 49 || e == 50 || e == 51 || e == 52) {
+            this.crosshair.buy(e);
+        }
         if( e == 80 ) {
-            if ( this.gameState == 1 ) {
-                this.gameState = 2;
+            if ( this.gameState == GameLayer.STATE.NORMAL ) {
                 this.gamePause();
             }
-            else if ( this.gameState == 2 ) {
-                this.gameState = 1;
+            else if ( this.gameState == GameLayer.STATE.PAUSE ) {
                 this.gameResume();
             }
         }
-        if( e == 81 && this.gameState == 0) {
+        if( e == 81 && this.gameState == GameLayer.STATE.END ) {
             cc.Director.getInstance().replaceScene( new myApp.startScene() );
         }
         if( e == 82 ) {
-            if ( this.gameState != 1 ) {
+            if ( this.gameState != GameLayer.STATE.NORMAL ) {
                 return;
             }
             this.crosshair.reload();
         }
         if( e == 32) {
-            if ( this.gameState != 1 ) {
+            if ( this.gameState != GameLayer.STATE.NORMAL ) {
                 return;
             }
             this.crosshair.fire();
         }
     },
+
     onKeyUp: function( e ) {
         if(e == 37 || e == 38 || e == 39 || e == 40) {
             this.crosshair.release(e);
         }
     },
+
     onMouseMoved: function (event) {
         this.crosshair.setPosition(cc.p( event.getLocation().x, event.getLocation().y));
+        return true;
     },
+
     onMouseDown:function (events) {
-        console.log(cc.p( events.getLocation().x, events.getLocation().y));
+        if ( this.gameState != GameLayer.STATE.NORMAL ) {
+            return;
+        }
+        this.crosshair.fire();
+        return true;
     },
 
     spawnZombieAll: function ( ) {
@@ -135,6 +155,7 @@
             }
         }
     },
+
     spawnZombie: function ( ) {
         var amount = 0;
         for(var i = 0; i < this.zombie.length; i++) {
@@ -151,23 +172,24 @@
 
     gameOver: function() {
         this.gameOverLabel = cc.LabelTTF.create( '      Game Over\n Press q to restart', 'Arial', 40 );
-        this.gameOverLabel.setPosition( new cc.Point( 400, 300 ) );
+        this.gameOverLabel.setPosition( new cc.Point( 400, 550 ) );
         this.addChild(this.gameOverLabel);
         for(var i = 0; i < this.zombie.length; i++) {
             this.zombie[i].pause();
         }
         this.unschedule(this.spawnZombie);
-        this.gameState = 0;
+        this.gameState = GameLayer.STATE.END;
     },
 
     gamePause: function() {
         this.gamePauseLabel = cc.LabelTTF.create( '         Paused\n Press p to resume', 'Arial', 40 );
-        this.gamePauseLabel.setPosition( new cc.Point( 400, 300 ) );
+        this.gamePauseLabel.setPosition( new cc.Point( 400, 550 ) );
         this.addChild(this.gamePauseLabel);
         for(var i = 0; i < this.zombie.length; i++) {
             this.zombie[i].pause();
         }
         this.unschedule(this.spawnZombie);
+        this.gameState = GameLayer.STATE.PAUSE;
     },
 
     gameResume: function() {
@@ -175,7 +197,8 @@
         for(var i = 0; i < this.zombie.length; i++) {
             this.zombie[i].resume();
         }
-        this.schedule(this.spawnZombie, 2);        
+        this.schedule(this.spawnZombie, 2);  
+        this.gameState = GameLayer.STATE.NORMAL;      
     }, 
 
     activeScore: function( amount ){
@@ -191,10 +214,44 @@
         actions.push( cc.CallFunc.create( score.removeFromParent, score, true));
         score.runAction( cc.Sequence.create( actions ) );
         this.addChild( score );
+    },
+
+    minusMoney: function( amount ){
+        var score = cc.LabelTTF.create( '- ' + amount,  'Arial', 40 );
+        score.setPosition( cc.p(250,640) );
+        score.setVisible( false );
+        var actions = [];
+        actions.push( cc.Show.create() );
+        actions.push( cc.FadeIn.create(0.1) );
+        actions.push( cc.MoveBy.create( 0.2, cc.p( 0, -30 ) ) );
+        actions.push( cc.FadeOut.create(0.5) );
+        // actions.push( cc.Hide.create() );
+        actions.push( cc.CallFunc.create( score.removeFromParent, score, true));
+        score.runAction( cc.Sequence.create( actions ) );
+        this.addChild( score );
+    },
+
+    warn: function( message ){
+        var score = cc.LabelTTF.create( '' + message,  'Arial', 40 );
+        score.setPosition( cc.p(400,450) );
+        score.setVisible( false );
+        var actions = [];
+        actions.push( cc.Show.create() );
+        actions.push( cc.FadeIn.create(0.1) );
+        actions.push( cc.FadeOut.create(1.0) );
+        // actions.push( cc.Hide.create() );
+        actions.push( cc.CallFunc.create( score.removeFromParent, score, true));
+        score.runAction( cc.Sequence.create( actions ) );
+        this.addChild( score );
     } 
 
 });
 
+GameLayer.STATE = {
+    NORMAL: 1,
+    PAUSE: 2,
+    END: 0
+};
 var StartScene = cc.Scene.extend({
     onEnter: function() {
         this._super();

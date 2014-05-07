@@ -2,16 +2,32 @@ var Crosshair = cc.Sprite.extend({
     ctor: function( obj ) {
         this._super();
         this.initWithFile( 'images/crosshair2.png' );
+        this.currentGun = Crosshair.Gun.Deagle;
+        this.initialGunData();
         this.gameLayer = obj;
         this.isLeft = false;
         this.isRight = false;
         this.isUp = false;
         this.isDown = false;
-        this.ammo = 7;
+        this.magazine = 10;
+        this.ammo = this.ammoList[this.currentGun];
         this.fireRate = 0;
         this.reloadTime = 1.5;
         this.reloading = false;
     },
+
+    initialGunData: function() {
+        this.ammoList = new Array(3);
+        this.ammoList[0] = 7;
+        this.ammoList[1] = 15;
+        this.ammoList[2] = 30;
+
+        this.fireRateList = new Array(3);
+        this.fireRateList[0] = 14;
+        this.fireRateList[1] = 7;
+        this.fireRateList[2] = 3;
+    },
+
     press: function( input ) {
     	if ( input == 37 ) {
     		this.isLeft = true;
@@ -75,6 +91,7 @@ var Crosshair = cc.Sprite.extend({
 		    }
 	    }
         this.gameLayer.ammoLabel.setString( 'ammo  ' + this.ammo );
+        this.gameLayer.magazineLabel.setString( 'magazine  ' + this.magazine );
         if ( this.fireRate > 0) {
             this.fireRate -= 1;
         }
@@ -105,7 +122,7 @@ var Crosshair = cc.Sprite.extend({
             this.gameLayer.addChild(this.gameLayer.outOfAmmoLabel);
         }
         this.ammo -= 1;
-        this.fireRate = 20;
+        this.fireRate = this.fireRateList[this.currentGun];
         cc.AudioEngine.getInstance().playEffect( 'effects/gunfire.wav' );
         var tempDistance = 0;
         var target = 0;
@@ -140,7 +157,55 @@ var Crosshair = cc.Sprite.extend({
         }
     },
 
+    buy: function(input) {
+        if( this.gameLayer.gameState != GameLayer.STATE.NORMAL ) {
+            return;
+        }
+        if( input == 49 ) {
+            if( this.gameLayer.money >= 200 ) {
+                this.gameLayer.minusMoney(200);
+                this.gameLayer.money -= 200;
+                this.magazine += 1;
+                this.gameLayer.magazineLabel.setString( 'magazine  ' + this.magazine );
+            }
+            else {
+                this.gameLayer.warn("Not enough money, require 200 gold");
+            }
+        }
+        else if ( input == 50 ) {
+            if( this.gameLayer.money >= 3000 && this.currentGun < Crosshair.Gun.MP5 ) {
+                this.gameLayer.minusMoney(3000);
+                this.gameLayer.money -= 3000;
+                this.currentGun = Crosshair.Gun.MP5;
+                this.ammo = this.ammoList[this.currentGun];
+            }
+            else if ( this.currentGun >= Crosshair.Gun.MP5 ) {
+                this.gameLayer.warn("You already have MP5 or higher destructive gun");
+            }
+            else {
+                this.gameLayer.warn("Not enough money, require 3000 gold for MP5");
+            }            
+        }
+        else if ( input == 51 ) {
+            if( this.gameLayer.money >= 7000 && this.currentGun < Crosshair.Gun.M4A1 ) {
+                this.gameLayer.minusMoney(7000);
+                this.gameLayer.money -= 7000;
+                this.currentGun = Crosshair.Gun.M4A1;
+                this.ammo = this.ammoList[this.currentGun];
+            }
+            else if ( this.currentGun >= Crosshair.Gun.M4A1 ) {
+                this.gameLayer.warn("You already have M4A1 or higher destructive gun");
+            }
+            else {
+                this.gameLayer.warn("Not enough money, require 7000 gold for M4A1");
+            }            
+        }
+    },
+
     reload: function() {
+        if( this.magazine <= 0 ) {
+            return;
+        }
         if(this.reloading == false) {
             cc.AudioEngine.getInstance().playEffect( 'effects/reload.wav' );
             this.ammo = 0;
@@ -148,10 +213,17 @@ var Crosshair = cc.Sprite.extend({
             this.gameLayer.removeChild(this.gameLayer.outOfAmmoLabel);
             this.gameLayer.addChild(this.gameLayer.reloadLabel);
             this.scheduleOnce(function() {
-                this.ammo = 7;
+                this.ammo = this.ammoList[this.currentGun];
+                this.magazine -= 1;
                 this.gameLayer.removeChild(this.gameLayer.reloadLabel);
                 this.reloading = false
-            }    , this.reloadTime);
+            }, this.reloadTime);
         }
     }
 });
+
+Crosshair.Gun = {
+    Deagle: 0,
+    MP5: 1,
+    M4A1: 2
+};
