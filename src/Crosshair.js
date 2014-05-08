@@ -14,6 +14,15 @@ var Crosshair = cc.Sprite.extend({
         this.fireRate = 0;
         this.reloadTime = 1.5;
         this.reloading = false;
+
+        this.mode = 0;
+
+        this.bombOpacityFilter = 0;
+
+        this.bomb = new cc.Sprite();
+        this.bomb.initWithFile( 'images/radar.png');
+        this.bomb.setPosition(40,40);
+        this.bomb.setOpacity(150)
     },
 
     initialGunData: function() {
@@ -90,6 +99,20 @@ var Crosshair = cc.Sprite.extend({
 		    	this.setPosition( new cc.Point( pos.x, 0 ) );
 		    }
 	    }
+        if (this.mode == 1) { 
+            if (this.bomb.getOpacity() <= 10) {
+                this.bombOpacityFilter = 1;
+            }
+            if (this.bomb.getOpacity() >= 150) {
+                this.bombOpacityFilter = 0;
+            }
+            if(this.bombOpacityFilter == 0) {
+                this.bomb.setOpacity(this.bomb.getOpacity()-5);
+            }
+            if(this.bombOpacityFilter == 1) {
+                this.bomb.setOpacity(this.bomb.getOpacity()+5);
+            }
+        }
         this.gameLayer.ammoLabel.setString( 'ammo  ' + this.ammo );
         this.gameLayer.magazineLabel.setString( 'magazine  ' + this.magazine );
         if ( this.fireRate > 0) {
@@ -173,9 +196,9 @@ var Crosshair = cc.Sprite.extend({
             }
         }
         else if ( input == 50 ) {
-            if( this.gameLayer.money >= 3000 && this.currentGun < Crosshair.Gun.MP5 ) {
-                this.gameLayer.minusMoney(3000);
-                this.gameLayer.money -= 3000;
+            if( this.gameLayer.money >= 2500 && this.currentGun < Crosshair.Gun.MP5 ) {
+                this.gameLayer.minusMoney(2500);
+                this.gameLayer.money -= 2500;
                 this.currentGun = Crosshair.Gun.MP5;
                 this.ammo = this.ammoList[this.currentGun];
             }
@@ -183,7 +206,7 @@ var Crosshair = cc.Sprite.extend({
                 this.gameLayer.warn("You already have MP5 or higher destructive gun");
             }
             else {
-                this.gameLayer.warn("Not enough money, require 3000 gold for MP5");
+                this.gameLayer.warn("Not enough money, require 2500 gold for MP5");
             }            
         }
         else if ( input == 51 ) {
@@ -204,6 +227,7 @@ var Crosshair = cc.Sprite.extend({
 
     reload: function() {
         if( this.magazine <= 0 ) {
+            this.gameLayer.warn("Not enough magazine!");
             return;
         }
         if(this.reloading == false) {
@@ -218,6 +242,20 @@ var Crosshair = cc.Sprite.extend({
                 this.gameLayer.removeChild(this.gameLayer.reloadLabel);
                 this.reloading = false
             }, this.reloadTime);
+        }
+    },
+
+    changeMode: function() {
+        if(this.gameLayer.gameState != 1) {
+            return;
+        }
+        if(this.mode == 0) {
+            this.mode = 1;
+            this.addChild( this.bomb );
+        }
+        else {
+            this.mode = 0;
+            this.removeChild( this.bomb );
         }
     }
 });

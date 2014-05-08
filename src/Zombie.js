@@ -67,13 +67,11 @@ var Zombie = cc.Layer.extend({
             return false;
         }
     	this.hp -= dmg;
-    	console.log("remaining hp : " + this.hp);
         if( this.hp <= 0 ) {
             return true; //Zombie Died
         }
         else {
             cc.AudioEngine.getInstance().playEffect( 'effects/zombiegetshot.mp3' );
-            console.log(this.getPosition().x + " , " + this.getPosition().y); //Debug
             return false; //Zombie Alive
         }
     }, 

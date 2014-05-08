@@ -4,6 +4,7 @@ var g_resources = [
     {src: 'images/grass.png' },
     {src: 'images/zombie.png' },
  	{src: 'images/testSprite.png' },
+ 	{src: 'images/upperbar.png'},
  	{src: 'images/testSprite.plist' },
     //plist
  

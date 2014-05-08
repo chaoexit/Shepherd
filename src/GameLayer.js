@@ -1,13 +1,16 @@
-    var GameLayer = cc.LayerColor.extend({
+var GameLayer = cc.LayerColor.extend({
     init: function() {
+
         this.money = 0;
         this.spawnPosY = [547, 460, 377, 293, 212, 121, 44];
 
-        this.gameState = this.gameState = GameLayer.STATE.NORMAL;
+        this.gameState = GameLayer.STATE.NORMAL;
         this.muted = 0;
 
         this._super( new cc.Color4B( 127, 127, 127, 255 ) );
         this.setPosition( new cc.Point( 0, 0 ) );
+
+        this.runAction( cc.FadeIn.create(3.0) );
 
         this.crosshair = new Crosshair(this);
         this.crosshair.scheduleUpdate()
@@ -18,6 +21,11 @@
         this.grass = new Grass();
         this.grass.setPosition( new cc.Point( screenWidth / 2, screenHeight / 2 ) );
         this.addChild(this.grass);
+
+        this.upperbar = new UpperBar();
+        this.upperbar.setPosition( new cc.Point( 400, 650 ) );
+        this.upperbar.setOpacity(100);
+        this.addChild(this.upperbar);
 
         this.redline = new Redline();
         this.redline.setPosition( new cc.Point( 144, 300 ) );
@@ -80,6 +88,9 @@
         console.log(e);
         if(e == 77) {
             this.mute();
+        }
+        if( e == 71 ) {
+            this.crosshair.changeMode();
         }
         if(e == 37 || e == 38 || e == 39 || e == 40) {
             this.crosshair.press(e);
@@ -175,7 +186,7 @@
     },
 
     gameOver: function() {
-        this.gameOverLabel = cc.LabelTTF.create( '      Game Over\n Press q to restart', 'Arial', 40 );
+        this.gameOverLabel = cc.LabelTTF.create( '      Game Over\n Press Q to restart', 'Arial', 40 );
         this.gameOverLabel.setPosition( new cc.Point( 400, 550 ) );
         this.addChild(this.gameOverLabel);
         for(var i = 0; i < this.zombie.length; i++) {
@@ -186,7 +197,7 @@
     },
 
     gamePause: function() {
-        this.gamePauseLabel = cc.LabelTTF.create( '         Paused\n Press p to resume', 'Arial', 40 );
+        this.gamePauseLabel = cc.LabelTTF.create( '         Paused\n Press P to resume', 'Arial', 40 );
         this.gamePauseLabel.setPosition( new cc.Point( 400, 550 ) );
         this.addChild(this.gamePauseLabel);
         for(var i = 0; i < this.zombie.length; i++) {
@@ -272,10 +283,18 @@ GameLayer.STATE = {
 var StartScene = cc.Scene.extend({
     onEnter: function() {
         this._super();
-        var layer = new GameLayer();
+        var layer = new IntroScene();
         layer.init();
         this.addChild( layer );
     }
 });
+
+GameLayer.scene = function() {
+    var scene = cc.Scene.create();
+    var layer = new GameLayer();
+    layer.init();
+    scene.addChild(layer);
+    return scene;
+}
 
 

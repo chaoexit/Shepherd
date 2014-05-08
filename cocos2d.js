@@ -18,7 +18,9 @@
             'src/Grass.js',
             'src/resource.js',
             'src/Redline.js',
-            'src/HealthBar.js'   //add your own files in order here
+            'src/HealthBar.js',
+            'src/IntroScene.js',
+            'src/UpperBar.js'   //add your own files in order here
         ]
     };
 
