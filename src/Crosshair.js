@@ -11,6 +11,7 @@ var Crosshair = cc.Sprite.extend({
         this.isDown = false;
         this.magazine = 10;
         this.ammo = this.ammoList[this.currentGun];
+        this.grenade = 1;
         this.fireRate = 0;
         this.reloadTime = 1.5;
         this.reloading = false;
@@ -134,48 +135,92 @@ var Crosshair = cc.Sprite.extend({
          ( myPos.y - oPos.y ) <= 35 && (myPos.y - oPos.y) >= 18 );
     },
 
+    killZombieByGrenade: function(array) {
+        for(var i = 0; i < array.length; i++) {
+            this.gameLayer.zombie[array[i]].getShot(10);
+            var randomAmountHeadShot = Math.round(Math.random()*200);
+            this.gameLayer.money += randomAmountHeadShot;
+            this.gameLayer.moneyLabel.setString('' + this.gameLayer.money );
+            this.gameLayer.activeScore(randomAmountHeadShot);
+        }
+        cc.AudioEngine.getInstance().playEffect( 'effects/grenade.mp3' );
+        this.gameLayer.removeChild(this.grenadeEffect);
+    },
+
     fire:function () {
-        if(this.ammo <= 0) {
-            return;
-        }
-        if(this.fireRate > 0) {
-            return;
-        }
-        if( this.ammo == 1) {
-            this.gameLayer.addChild(this.gameLayer.outOfAmmoLabel);
-        }
-        this.ammo -= 1;
-        this.fireRate = this.fireRateList[this.currentGun];
-        cc.AudioEngine.getInstance().playEffect( 'effects/gunfire.wav' );
-        var tempDistance = 0;
-        var target = 0;
-        for(var i = 0; i < this.gameLayer.zombie.length; i++) {
-            if(this.gameLayer.zombie[i].state == 0) {
-                continue;
+        if ( this.mode == 1 ) {
+            if ( this.grenade >= 1 ) {
+                var tempArray = new Array();
+                for(var i = 0; i < this.gameLayer.zombie.length; i++) {
+                    if(this.gameLayer.zombie[i].state == 0) {
+                        continue;
+                    }
+                    var x = Math.pow(this.getPosition().x-this.gameLayer.zombie[i].getPosition().x, 2);
+                    var y = Math.pow(this.getPosition().y-this.gameLayer.zombie[i].getPosition().y, 2);
+                    var distance = Math.sqrt(x+y)
+                    if ( distance < 150 ) {
+                        tempArray.push(i);
+                    }
+                }
+                this.scheduleOnce(function() {
+                    this.killZombieByGrenade(tempArray);
+                }, 1);
+                this.grenade--;
+                this.gameLayer.updateGrenade();
+                this.grenadeEffect = new grenadeSprite();
+                this.grenadeEffect.setPosition(this.getPosition().x, this.getPosition().y);
+                this.gameLayer.addChild(this.grenadeEffect);
+                this.schedule(function() {
+                    this.grenadeEffect.setScaleX(this.grenadeEffect.getScaleX()+0.01);
+                    this.grenadeEffect.setScaleY(this.grenadeEffect.getScaleY()+0.01);
+                }, 0.02, 30);
             }
-            var x = Math.pow(this.getPosition().x-this.gameLayer.zombie[i].getPosition().x, 2);
-            var y = Math.pow(this.getPosition().y-this.gameLayer.zombie[i].getPosition().y, 2);
-            var distance = Math.sqrt(x+y)
-            if( i == 0 || distance < tempDistance) {
-                target = i;
-                tempDistance = distance;
+            else {
+                this.gameLayer.warn("No grenade left!");
             }
         }
-        var randomAmount = Math.round(Math.random()*100);
-        var randomAmountHeadShot = Math.round(Math.random()*200);
-        if(this.closeToHead(this.gameLayer.zombie[target])) {
-            console.log('headshot!!');
-            if ( this.gameLayer.zombie[target].getShot(5) ) {
-                    this.gameLayer.money += randomAmountHeadShot;
+        else {
+            if(this.ammo <= 0) {
+                return;
+            }
+            if(this.fireRate > 0) {
+                return;
+            }
+            if( this.ammo == 1) {
+                    this.gameLayer.addChild(this.gameLayer.outOfAmmoLabel);
+            }
+            this.ammo -= 1;
+            this.fireRate = this.fireRateList[this.currentGun];
+            cc.AudioEngine.getInstance().playEffect( 'effects/gunfire.wav' );
+            var tempDistance = 0;
+            var target = 0;
+            for(var i = 0; i < this.gameLayer.zombie.length; i++) {
+                if(this.gameLayer.zombie[i].state == 0) {
+                    continue;
+                }
+                var x = Math.pow(this.getPosition().x-this.gameLayer.zombie[i].getPosition().x, 2);
+                var y = Math.pow(this.getPosition().y-this.gameLayer.zombie[i].getPosition().y, 2);
+                var distance = Math.sqrt(x+y)
+                if( i == 0 || distance < tempDistance) {
+                    target = i;
+                    tempDistance = distance;
+                }
+            }
+            var randomAmount = Math.round(Math.random()*100);
+            var randomAmountHeadShot = Math.round(Math.random()*200);
+            if(this.closeToHead(this.gameLayer.zombie[target])) {
+                if ( this.gameLayer.zombie[target].getShot(5) ) {
+                        this.gameLayer.money += randomAmountHeadShot;
+                        this.gameLayer.moneyLabel.setString('' + this.gameLayer.money );
+                        this.gameLayer.activeScore(randomAmountHeadShot);
+                }
+            }        
+            else if(this.closeTo(this.gameLayer.zombie[target]) && this.gameLayer.zombie[target].state != 3) {
+                if ( this.gameLayer.zombie[target].getShot(1) ) {
+                    this.gameLayer.money += randomAmount;
                     this.gameLayer.moneyLabel.setString('' + this.gameLayer.money );
-                    this.gameLayer.activeScore(randomAmountHeadShot);
-            }
-        }        
-        else if(this.closeTo(this.gameLayer.zombie[target]) && this.gameLayer.zombie[target].state != 3) {
-            if ( this.gameLayer.zombie[target].getShot(1) ) {
-                this.gameLayer.money += randomAmount;
-                this.gameLayer.moneyLabel.setString('' + this.gameLayer.money );
-                this.gameLayer.activeScore(randomAmount);
+                    this.gameLayer.activeScore(randomAmount);
+                }
             }
         }
     },
@@ -196,9 +241,9 @@ var Crosshair = cc.Sprite.extend({
             }
         }
         else if ( input == 50 ) {
-            if( this.gameLayer.money >= 2500 && this.currentGun < Crosshair.Gun.MP5 ) {
-                this.gameLayer.minusMoney(2500);
-                this.gameLayer.money -= 2500;
+            if( this.gameLayer.money >= 2000 && this.currentGun < Crosshair.Gun.MP5 ) {
+                this.gameLayer.minusMoney(2000);
+                this.gameLayer.money -= 2000;
                 this.currentGun = Crosshair.Gun.MP5;
                 this.ammo = this.ammoList[this.currentGun];
             }
@@ -206,7 +251,7 @@ var Crosshair = cc.Sprite.extend({
                 this.gameLayer.warn("You already have MP5 or higher destructive gun");
             }
             else {
-                this.gameLayer.warn("Not enough money, require 2500 gold for MP5");
+                this.gameLayer.warn("Not enough money, require 2000 gold for MP5");
             }            
         }
         else if ( input == 51 ) {
@@ -221,6 +266,20 @@ var Crosshair = cc.Sprite.extend({
             }
             else {
                 this.gameLayer.warn("Not enough money, require 7000 gold for M4A1");
+            }            
+        }
+        else if ( input == 52 ) {
+            if( this.gameLayer.money >= 2000 && this.grenade <= 2 ) {
+                this.gameLayer.minusMoney(2000);
+                this.gameLayer.money -= 2000;
+                this.grenade++;
+                this.gameLayer.updateGrenade();
+            }
+            else if ( this.grenade >= 3 ) {
+                this.gameLayer.warn("You already have 3 grenades");
+            }
+            else {
+                this.gameLayer.warn("Not enough money, require 2000 gold for grenade");
             }            
         }
     },
@@ -259,6 +318,7 @@ var Crosshair = cc.Sprite.extend({
         }
     }
 });
+
 
 Crosshair.Gun = {
     Deagle: 0,

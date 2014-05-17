@@ -5,6 +5,9 @@ var g_resources = [
     {src: 'images/zombie.png' },
  	{src: 'images/testSprite.png' },
  	{src: 'images/upperbar.png'},
+ 	{src: 'images/radar.png'},
+ 	{src: 'images/grenade.png'},
+ 	{src: 'images/start.png'},
  	{src: 'images/testSprite.plist' },
     //plist
  
@@ -19,6 +22,7 @@ var g_resources = [
  	{src: 'effects/ambiance1.mp3' },
  	{src: 'effects/ambiance2.mp3' },
  	{src: 'effects/zombiegetshot.mp3' },
+ 	{src: 'effects/grenade.mp3' },
  	{src: 'effects/reload.wav' }
     //effect
 ];

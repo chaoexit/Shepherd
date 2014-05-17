@@ -45,6 +45,9 @@ var GameLayer = cc.LayerColor.extend({
         cc.AudioEngine.getInstance().setMusicVolume(0.7);
         cc.AudioEngine.getInstance().playMusic( 'effects/song.mp3', 100 );
 
+
+        this.initGrenade();
+
         this.scheduleUpdate();
         return true;
     },
@@ -84,6 +87,31 @@ var GameLayer = cc.LayerColor.extend({
         this.outOfAmmoLabel.setPosition( new cc.Point( screenWidth / 2, screenHeight / 2 ) );
     },
 
+    initGrenade: function() {
+        this.grenade = new Array(3);
+        this.grenade[0] = new grenadeSprite();
+        this.grenade[0].setPosition(350, 640);
+
+        this.grenade[1] = new grenadeSprite();
+        this.grenade[1].setPosition(450, 640);
+
+        this.grenade[2] = new grenadeSprite();
+        this.grenade[2].setPosition(550, 640);
+
+        for(var i = 0; i < this.crosshair.grenade; i++) {
+            this.addChild(this.grenade[i]);
+        }
+    },
+
+    updateGrenade: function() {
+        for(var i = 0; i < this.crosshair.grenade; i++) {
+            this.addChild(this.grenade[i]);
+        }
+        for(var i = this.crosshair.grenade; i < this.grenade.length; i++) {
+            this.removeChild(this.grenade[i]);
+        }
+    },
+
     onKeyDown: function( e ) {
         console.log(e);
         if(e == 77) {
@@ -107,7 +135,10 @@ var GameLayer = cc.LayerColor.extend({
             }
         }
         if( e == 81 && this.gameState == GameLayer.STATE.END ) {
-            cc.Director.getInstance().replaceScene( new myApp.startScene() );
+            this.runAction( cc.FadeOut.create(2.0));
+            this.scheduleOnce( function() {
+                cc.Director.getInstance().replaceScene( new myApp.startScene() );
+            }, 1);
         }
         if( e == 82 ) {
             if ( this.gameState != GameLayer.STATE.NORMAL ) {
@@ -296,5 +327,14 @@ GameLayer.scene = function() {
     scene.addChild(layer);
     return scene;
 }
+
+var grenadeSprite = cc.Sprite.extend({
+    ctor: function() {
+        this._super();
+        this.initWithFile( 'images/grenade.png' );
+        this.setScaleX(0.1);
+        this.setScaleY(0.1);
+    }
+});
 
 
